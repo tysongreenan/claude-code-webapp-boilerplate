@@ -1,5 +1,11 @@
 # Webapp Boilerplate v2 — Convex + Clerk + AI
 
+## FIRST TIME SETUP
+**When the user says "set up the project", "get started", "initialize", or "configure everything":**
+Read and follow the plan at `.claude/plans/setup.md` — it has the complete step-by-step
+setup process with agent assignments, environment variable configuration, and verification steps.
+The plan is designed to one-shot the entire setup with minimal back-and-forth.
+
 ## Tech Stack
 - **Framework:** Next.js 14, React 18, TypeScript
 - **Backend:** Convex (real-time database, server functions, file storage)

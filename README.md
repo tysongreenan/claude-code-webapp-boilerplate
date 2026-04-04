@@ -27,19 +27,31 @@ A production-ready, AI-powered webapp boilerplate designed for [Claude Code](htt
 git clone https://github.com/YOUR_USERNAME/claude-code-webapp-boilerplate-v2.git my-app
 cd my-app
 
-# 2. Run setup (checks CLIs, installs deps, creates .env.local)
-bash scripts/setup.sh
-
-# 3. Start Convex (creates backend automatically)
-npx convex dev
-
-# 4. Fill in your keys in .env.local + Convex env vars
-
-# 5. Run
-npm run dev
-
-# 6. Build with Claude Code
+# 2. Open Claude Code and let it handle everything
 claude
+
+# Then just say:
+# "Set up the project"
+#
+# Claude Code will:
+# - Install dependencies
+# - Initialize Convex
+# - Ask you for API keys (one by one)
+# - Configure all environment variables
+# - Generate your admin setup key
+# - Start the dev server
+# - Walk you through admin claim
+#
+# The entire setup is pre-planned in .claude/plans/setup.md
+```
+
+### Manual setup (without Claude Code)
+
+```bash
+bash scripts/setup.sh    # Check CLIs, install deps, generate admin key
+npx convex dev            # Initialize Convex backend
+# Fill in .env.local + Convex env vars (see .env.example)
+npm run dev               # Start dev server
 ```
 
 ## What's Included
