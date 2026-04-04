@@ -186,3 +186,43 @@ npm run dev
 - Only someone with the key can become admin at /admin/setup
 - After claiming, the key is no longer needed (one-time use)
 - Additional admins can be granted by existing admins from the admin panel
+
+---
+
+## Slash Commands (Custom Skills)
+
+These are pre-built skills the user can invoke:
+
+| Command | What it does |
+|---------|-------------|
+| `/monitor` | Check Vercel logs for errors, diagnose and fix them |
+| `/deploy` or `/deploy prod` | Pre-flight checks → deploy → post-deploy verification |
+| `/health` | Check all 10 services are connected and responding |
+| `/ingest-blog` | Feed all blog posts into the AI chatbot knowledge base |
+
+### Automation with Loop and Schedule
+
+These commands are designed to work with Claude Code's automation features:
+
+**Continuous monitoring (during development):**
+```
+/loop 5m /monitor
+```
+Checks Vercel logs every 5 minutes. Auto-fixes code bugs it finds.
+
+**Daily health check:**
+```
+/schedule "Daily health" --cron "0 9 * * *" --prompt "/health"
+```
+
+**When the user says "monitor my site" or "set up monitoring":**
+Read and follow `.claude/plans/ops.md` — it has the full ops automation playbook.
+
+---
+
+## Plans
+
+| Plan | Trigger | File |
+|------|---------|------|
+| **Setup** | "set up the project", "get started" | `.claude/plans/setup.md` |
+| **Ops** | "monitor my site", "set up monitoring" | `.claude/plans/ops.md` |
