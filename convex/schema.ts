@@ -14,6 +14,7 @@ export default defineSchema({
     stripeCustomerId: v.optional(v.string()),
     stripeSubscriptionId: v.optional(v.string()),
     subscriptionEndsAt: v.optional(v.number()), // timestamp
+    isAdmin: v.optional(v.boolean()), // true = can access /admin
   })
     .index("by_token", ["tokenIdentifier"])
     .index("by_email", ["email"])

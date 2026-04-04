@@ -13,3 +13,14 @@ export async function getCurrentUser(ctx: QueryCtx | MutationCtx) {
     .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
     .unique()
 }
+
+/**
+ * Get the current user and verify they are an admin.
+ * Returns the user if admin, throws if not.
+ */
+export async function requireAdmin(ctx: QueryCtx | MutationCtx) {
+  const user = await getCurrentUser(ctx)
+  if (!user) throw new Error("Not authenticated")
+  if (!user.isAdmin) throw new Error("Not authorized — admin access required")
+  return user
+}

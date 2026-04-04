@@ -1,20 +1,69 @@
 /**
- * Admin queries — real-time stats for the admin dashboard
- * All queries auto-update when data changes (Convex real-time)
+ * Admin — protected queries and mutations
+ *
+ * Security model (WordPress-style):
+ * 1. First user to visit /admin/setup becomes the admin
+ * 2. All admin queries/mutations check isAdmin flag
+ * 3. Middleware blocks /admin routes for non-admins at the edge
+ * 4. Convex functions double-check isAdmin as a second layer
  */
 
-import { query } from "./_generated/server"
-import { getCurrentUser } from "./model/auth"
+import { query, mutation } from "./_generated/server"
+import { v } from "convex/values"
+import { getCurrentUser, requireAdmin } from "./model/auth"
 
-// Stats overview — user count, subscribers, revenue, documents
+// ── Check if current user is admin (used by middleware) ──
+
+export const isAdmin = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await getCurrentUser(ctx)
+    if (!user) return false
+    return user.isAdmin === true
+  },
+})
+
+// ── Check if any admin exists (for setup flow) ──────────
+
+export const hasAdmin = query({
+  args: {},
+  handler: async (ctx) => {
+    const admins = await ctx.db.query("users").collect()
+    return admins.some((u) => u.isAdmin === true)
+  },
+})
+
+// ── Setup: make current user the admin (one-time) ───────
+// Like WordPress install — first user to claim becomes admin.
+// Only works if no admin exists yet.
+
+export const claimAdmin = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const user = await getCurrentUser(ctx)
+    if (!user) throw new Error("Not authenticated")
+
+    // Check if an admin already exists
+    const allUsers = await ctx.db.query("users").collect()
+    const adminExists = allUsers.some((u) => u.isAdmin === true)
+
+    if (adminExists) {
+      throw new Error("An admin already exists. Contact the existing admin for access.")
+    }
+
+    // Make this user the admin
+    await ctx.db.patch(user._id, { isAdmin: true })
+    return { success: true }
+  },
+})
+
+// ── Stats overview ──────────────────────────────────────
+
 export const stats = query({
   args: {},
   handler: async (ctx) => {
     const user = await getCurrentUser(ctx)
-    if (!user) return null
-
-    // TODO: Add admin role check here
-    // if (user.role !== "admin") return null
+    if (!user?.isAdmin) return null
 
     const users = await ctx.db.query("users").collect()
     const payments = await ctx.db.query("payments").collect()
@@ -52,12 +101,13 @@ export const stats = query({
   },
 })
 
-// List all users with their plan info
+// ── List all users ──────────────────────────────────────
+
 export const listUsers = query({
   args: {},
   handler: async (ctx) => {
     const user = await getCurrentUser(ctx)
-    if (!user) return []
+    if (!user?.isAdmin) return []
 
     const users = await ctx.db.query("users").collect()
 
@@ -71,6 +121,28 @@ export const listUsers = query({
         billingCycle: u.billingCycle,
         joinedAt: u._creationTime,
         imageUrl: u.imageUrl,
+        isAdmin: u.isAdmin || false,
       }))
+  },
+})
+
+// ── Grant/revoke admin ──────────────────────────────────
+
+export const setAdmin = mutation({
+  args: {
+    userId: v.id("users"),
+    isAdmin: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    // Only existing admins can grant/revoke
+    const caller = await getCurrentUser(ctx)
+    if (!caller?.isAdmin) throw new Error("Not authorized")
+
+    // Prevent removing your own admin
+    if (args.userId === caller._id && !args.isAdmin) {
+      throw new Error("Cannot remove your own admin access")
+    }
+
+    await ctx.db.patch(args.userId, { isAdmin: args.isAdmin })
   },
 })
