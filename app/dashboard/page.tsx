@@ -28,7 +28,9 @@ export default function DashboardPage() {
         <div className="container mx-auto flex items-center justify-between h-16 px-4">
           <Link href="/" className="font-heading text-xl font-bold">YourApp</Link>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">{clerkUser?.primaryEmailAddress?.emailAddress}</span>
+            <Link href="/settings" className="text-sm text-muted-foreground hover:text-foreground">
+              Settings
+            </Link>
             <UserButton afterSignOutUrl="/" />
           </div>
         </div>
