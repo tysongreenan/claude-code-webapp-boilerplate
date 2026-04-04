@@ -1,20 +1,24 @@
 /**
- * AI Knowledge Base — Ingest, Embed, and Chat
+ * AI Knowledge Base — Ingest and Embed
+ *
+ * Handles document ingestion and embedding storage.
+ * Chat is handled by /api/ai/chat (AI SDK streaming route).
  *
  * Pipeline:
  * 1. User adds a document (page URL, text, FAQ)
  * 2. `ingest` action chunks the text and generates embeddings via OpenAI
  * 3. Embeddings stored in Pinecone, chunks stored in Convex
- * 4. `chat` action takes a question, finds relevant chunks via Pinecone, answers via OpenAI
  */
 
-import { action, mutation, query, internalMutation } from "./_generated/server"
+import { action, query, internalMutation } from "./_generated/server"
 import { v } from "convex/values"
 import { internal } from "./_generated/api"
 import { getCurrentUser } from "./model/auth"
 import OpenAI from "openai"
 import { Pinecone } from "@pinecone-database/pinecone"
 
+// Note: Convex actions use OpenAI SDK directly for embeddings during ingestion.
+// Chat uses AI SDK streaming in /api/ai/chat (Next.js route).
 function getOpenAI() {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 }
@@ -24,8 +28,6 @@ function getPinecone() {
 }
 
 const PINECONE_INDEX = process.env.PINECONE_INDEX || "knowledge"
-const CHUNK_SIZE = 500 // tokens (approx)
-const CHUNK_OVERLAP = 50
 
 // ── Chunking helper ─────────────────────────────────────
 
@@ -120,82 +122,6 @@ export const ingest = action({
   },
 })
 
-// ── Chat with the knowledge base ────────────────────────
-
-export const chat = action({
-  args: {
-    question: v.string(),
-    conversationId: v.optional(v.id("chatConversations")),
-    sessionId: v.string(),
-  },
-  handler: async (ctx, args) => {
-    // Embed the question
-    const openai = getOpenAI()
-    const embeddingResponse = await openai.embeddings.create({
-      model: "text-embedding-3-small",
-      input: [args.question],
-    })
-    const queryVector = embeddingResponse.data[0].embedding
-
-    // Search Pinecone for relevant chunks
-    const pinecone = getPinecone()
-    const index = pinecone.index(PINECONE_INDEX)
-
-    const searchResults = await index.query({
-      vector: queryVector,
-      topK: 5,
-      includeMetadata: true,
-    })
-
-    const relevantChunks = searchResults.matches
-      ?.map((m) => (m.metadata as any)?.text || "")
-      .filter(Boolean) || []
-
-    // Build context for the LLM
-    const context = relevantChunks.join("\n\n---\n\n")
-
-    const systemPrompt = `You are a helpful AI assistant for this website/product. Answer questions based on the provided context. If you don't know the answer from the context, say so honestly. Be concise and helpful.
-
-Context from the knowledge base:
-${context}`
-
-    // Generate answer
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: args.question },
-      ],
-      max_tokens: 500,
-      temperature: 0.7,
-    })
-
-    const answer = completion.choices[0]?.message?.content || "Sorry, I couldn't generate an answer."
-
-    // Save the conversation
-    let conversationId = args.conversationId
-    if (!conversationId) {
-      conversationId = await ctx.runMutation(internal.ai.createConversation, {
-        sessionId: args.sessionId,
-      })
-    }
-
-    await ctx.runMutation(internal.ai.saveMessage, {
-      conversationId,
-      role: "user",
-      content: args.question,
-    })
-
-    await ctx.runMutation(internal.ai.saveMessage, {
-      conversationId,
-      role: "assistant",
-      content: answer,
-    })
-
-    return { answer, conversationId }
-  },
-})
-
 // ── List documents ──────────────────────────────────────
 
 export const listDocuments = query({
@@ -206,18 +132,6 @@ export const listDocuments = query({
     return await ctx.db
       .query("knowledgeDocuments")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .collect()
-  },
-})
-
-// ── Get conversation messages ───────────────────────────
-
-export const getMessages = query({
-  args: { conversationId: v.id("chatConversations") },
-  handler: async (ctx, args) => {
-    return await ctx.db
-      .query("chatMessages")
-      .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
       .collect()
   },
 })
@@ -264,22 +178,3 @@ export const saveChunk = internalMutation({
   },
 })
 
-export const createConversation = internalMutation({
-  args: { sessionId: v.string() },
-  handler: async (ctx, args) => {
-    return await ctx.db.insert("chatConversations", {
-      sessionId: args.sessionId,
-    })
-  },
-})
-
-export const saveMessage = internalMutation({
-  args: {
-    conversationId: v.id("chatConversations"),
-    role: v.string(),
-    content: v.string(),
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.insert("chatMessages", args)
-  },
-})
