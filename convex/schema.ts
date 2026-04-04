@@ -69,4 +69,45 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_stripe_session", ["stripeSessionId"]),
+
+  // ── AI Knowledge Base ─────────────────────────────────
+  // Documents ingested for RAG chatbot (chunked text + metadata)
+  knowledgeDocuments: defineTable({
+    title: v.string(),
+    sourceUrl: v.optional(v.string()),
+    sourceType: v.string(), // 'page', 'doc', 'faq', 'blog', 'custom'
+    content: v.string(), // full text before chunking
+    teamId: v.optional(v.id("teams")),
+    userId: v.id("users"),
+  })
+    .index("by_user", ["userId"])
+    .index("by_team", ["teamId"]),
+
+  // Chunks with Pinecone vector IDs for retrieval
+  knowledgeChunks: defineTable({
+    documentId: v.id("knowledgeDocuments"),
+    chunkIndex: v.number(),
+    text: v.string(),
+    pineconeId: v.string(), // vector ID in Pinecone
+    tokenCount: v.number(),
+  })
+    .index("by_document", ["documentId"])
+    .index("by_pinecone", ["pineconeId"]),
+
+  // Chat conversations
+  chatConversations: defineTable({
+    userId: v.optional(v.id("users")), // null for anonymous visitors
+    sessionId: v.string(), // browser session for anonymous users
+    teamId: v.optional(v.id("teams")),
+  })
+    .index("by_session", ["sessionId"])
+    .index("by_user", ["userId"]),
+
+  // Chat messages
+  chatMessages: defineTable({
+    conversationId: v.id("chatConversations"),
+    role: v.string(), // 'user', 'assistant'
+    content: v.string(),
+  })
+    .index("by_conversation", ["conversationId"]),
 })

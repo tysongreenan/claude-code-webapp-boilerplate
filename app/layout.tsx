@@ -4,6 +4,7 @@ import { GeistMono } from 'geist/font/mono'
 import { Bricolage_Grotesque } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/providers/convex-client'
+import { ChatWidget } from '@/components/chat/chat-widget'
 import { Toaster } from 'react-hot-toast'
 
 const bricolage = Bricolage_Grotesque({
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       >
         <Providers>
           {children}
+          <ChatWidget />
           <Toaster
             position="top-right"
             toastOptions={{

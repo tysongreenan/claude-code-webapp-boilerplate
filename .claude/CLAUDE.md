@@ -1,4 +1,4 @@
-# Webapp Boilerplate v2 — Convex + Clerk
+# Webapp Boilerplate v2 — Convex + Clerk + AI
 
 ## Tech Stack
 - **Framework:** Next.js 14, React 18, TypeScript
@@ -7,6 +7,10 @@
 - **Styling:** Tailwind CSS, Radix UI, Framer Motion
 - **Payments:** Stripe (checkout, subscriptions, webhooks)
 - **Email:** Resend (transactional email via Convex actions)
+- **AI Chatbot:** OpenAI embeddings + Pinecone vector DB + RAG
+- **Analytics:** PostHog (product analytics, session replay, feature flags)
+- **Error Tracking:** Sentry (error capture, performance monitoring)
+- **Cache/Rate Limiting:** Upstash Redis (serverless)
 - **Content:** Markdown blog (gray-matter, remark)
 - **Deployment:** Vercel (frontend) + Convex Cloud (backend)
 
@@ -18,96 +22,113 @@
 **Role:** Writes all code, coordinates the team, makes architectural decisions.
 **Skills:**
 - Next.js 14 App Router, React Server Components
-- TypeScript, async/await, Promises
 - Convex — schema, queries, mutations, actions
-- Clerk — authentication, middleware, user management
-- Tailwind CSS, Radix UI, Framer Motion
+- Clerk — authentication, middleware
+- OpenAI + Pinecone — embeddings, RAG, AI chatbot
 - Stripe — checkout, subscriptions, webhooks
-- Git workflow and version control
+- Tailwind CSS, Radix UI, Framer Motion
+- PostHog, Sentry, Upstash integration
 
 ### Frontend Designer (Opus)
-**Role:** UX/UI specialist. Consulted for layout, component design, and user experience.
-**Skills files:** Must read and follow:
+**Role:** UX/UI specialist.
+**Skills files:**
 - `.claude/.agents/skills/frontend-design/SKILL.md`
 - `.claude/.agents/skills/brand-guidelines/SKILL.md`
 
 ### Backend Developer (Opus)
-**Role:** Backend specialist for Convex, Stripe, and deployment.
-**Skills files:** Must read and follow:
+**Role:** Backend specialist for Convex, AI, Stripe, deployment.
+**Skills files:**
 - `.claude/.agents/skills/convex-backend/SKILL.md`
 - `.claude/.agents/skills/stripe-integration/SKILL.md`
+- `.claude/.agents/skills/ai-chatbot/SKILL.md`
 
 ### Code Reviewer (Sonnet)
-**Role:** Reviews code. Catches bugs and suggests improvements.
+**Role:** Reviews code. Catches bugs, security issues, performance problems.
 
 ### File Master (Haiku)
-**Role:** Fast codebase navigator. Searches files, finds definitions.
+**Role:** Fast codebase navigator.
 
 ### Blog Content Writer (Opus)
-**Role:** SEO blog content specialist. Writes long-form blog posts.
+**Role:** SEO blog content specialist.
 
 ### Copywriter (Haiku)
-**Role:** Writes all user-facing text and handles SEO.
+**Role:** User-facing text and SEO.
 **Skill file:** `.claude/.agents/skills/nextjs-seo/SKILL.md`
 
 ---
 
 ## Workflow
-1. **Find** — Ask File Master (Haiku) to locate relevant code
-2. **Design** — Ask Frontend Designer (Opus) for UX/UI guidance
-3. **Copy** — Ask Copywriter (Haiku) for text content and SEO
-4. **Code** — Main Coder (Opus) writes the implementation
-5. **Review** — Send to Code Reviewer (Sonnet)
-6. **Fix** — Address review feedback
+1. **Find** — File Master locates relevant code
+2. **Design** — Frontend Designer for UX/UI guidance
+3. **Copy** — Copywriter for text and SEO
+4. **Code** — Main Coder implements
+5. **Review** — Code Reviewer checks quality
+6. **Fix** — Address feedback
 
 ---
 
 ## Project Structure
 
 ```
-convex/                 # Convex backend (replaces prisma/ + lib/auth + API routes)
-  schema.ts             # Database schema (tables, indexes, validators)
-  auth.config.ts        # Clerk auth provider config
-  users.ts              # User queries/mutations (synced from Clerk)
-  projects.ts           # Project CRUD (real-time)
-  teams.ts              # Team management + invitations
-  stripe.ts             # Stripe checkout/portal actions + upgrade mutations
+convex/                 # Backend
+  schema.ts             # Database schema (users, teams, projects, payments, AI knowledge base)
+  auth.config.ts        # Clerk provider config
+  users.ts              # User CRUD (synced from Clerk)
+  projects.ts           # Projects (real-time)
+  teams.ts              # Teams + invitations
+  stripe.ts             # Stripe actions + mutations
   email.ts              # Resend email actions
+  ai.ts                 # AI pipeline (ingest, embed, chat)
   model/auth.ts         # getCurrentUser() helper
-app/                    # Next.js App Router
-  api/stripe/webhook/   # Only API route needed (Stripe webhook)
-  auth/                 # Clerk sign-in/sign-up pages
-  blog/                 # Blog (index + [slug])
-  dashboard/            # Protected dashboard (real-time)
+app/                    # Next.js pages
+  api/stripe/webhook/   # Stripe webhook (only API route)
+  auth/                 # Clerk sign-in/register
+  blog/                 # Markdown blog
+  dashboard/            # Real-time dashboard
 components/
-  ui/                   # Button, Card, Input (shadcn pattern)
-  providers/            # Convex + Clerk + Theme provider
+  ui/                   # Button, Card, Input
+  chat/                 # AI chatbot widget
+  providers/            # Convex + Clerk + PostHog + Theme
 lib/
-  utils.ts              # cn(), formatDate, etc.
-  blog.ts               # Markdown blog utilities
-content/blog/           # Markdown blog posts
+  utils.ts              # cn(), formatDate
+  blog.ts               # Markdown blog parser
+  upstash.ts            # Redis client, rate limiter, cache helpers
+  sentry.ts             # Error capture helper
+sentry.client.config.ts # Sentry browser config
+sentry.server.config.ts # Sentry server config
+scripts/setup.sh        # CLI checker + setup wizard
+content/blog/           # Markdown posts
 middleware.ts           # Clerk auth middleware
 ```
 
 ## Key Patterns
 
-### Convex Functions (3 types)
-- **Queries** — read-only, cached, auto-subscribed via `useQuery`
-- **Mutations** — read-write, transactional, called via `useMutation`
-- **Actions** — side effects (Stripe, Resend), called via `useAction`
+### Real-Time Data
+Every `useQuery` is a live subscription. No polling, no cache invalidation. Open two tabs to see it.
 
-### Auth Flow
-- Clerk handles all sign-in/sign-up UI and OAuth
-- Clerk webhook syncs user to Convex via `users.upsertFromClerk`
-- `getCurrentUser()` helper resolves Clerk identity → Convex user record
-- Middleware protects `/dashboard` routes
-
-### Real-Time
-- Every `useQuery` is a live subscription — no polling, no cache invalidation
-- Mutations update all connected clients instantly via WebSocket
-- Open two tabs to see it in action
+### AI Chatbot (RAG)
+- Ingest: text → chunk → embed (OpenAI) → store (Pinecone + Convex)
+- Chat: question → embed → search Pinecone → top 5 chunks → GPT-4o-mini → answer
+- Widget: `<ChatWidget />` — floating bubble on every page
 
 ### Payments
-- `convex/stripe.ts` creates checkout sessions (action) and upgrades users (mutation)
-- Stripe webhook at `/api/stripe/webhook` calls Convex mutations directly
-- Customer portal for subscription management
+Stripe checkout via Convex actions. Webhook at `/api/stripe/webhook` calls Convex mutations.
+
+### Observability
+- **PostHog** — auto-tracks pageviews, identifies users via Clerk
+- **Sentry** — catches errors client + server, session replay on errors
+
+### Rate Limiting
+`lib/upstash.ts` — `createRateLimiter()` for API protection
+
+## CLI Tools
+
+| CLI | Install | Purpose |
+|-----|---------|---------|
+| Node.js | nodejs.org | Runtime |
+| Convex | `npm install convex` (bundled) | Backend dev |
+| Vercel | `npm i -g vercel` | Deploy frontend |
+| Stripe | `brew install stripe/stripe-cli/stripe` | Test webhooks |
+
+## Setup
+Run `bash scripts/setup.sh` for guided setup.

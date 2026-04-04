@@ -1,103 +1,139 @@
-# Claude Code Webapp Boilerplate v2 — Convex Edition
+# Claude Code Webapp Boilerplate v2 — Full Stack + AI
 
-A simpler, real-time production boilerplate designed for [Claude Code](https://claude.ai/claude-code). Convex replaces Prisma + Supabase. Clerk replaces NextAuth. Fewer files, fewer configs, more power.
+A production-ready, AI-powered webapp boilerplate designed for [Claude Code](https://claude.ai/claude-code). Real-time backend, managed auth, payments, AI chatbot, analytics, error tracking — everything wired up.
 
-## v1 vs v2
+## The Stack
 
-| | v1 (Supabase) | v2 (Convex) |
-|---|---|---|
-| **Database** | Supabase + Prisma ORM | Convex (built-in) |
-| **Auth** | NextAuth.js (manual config) | Clerk (managed) |
-| **Real-time** | None (manual polling) | Automatic (every query) |
-| **Migrations** | Prisma migrate | None (auto-deploy) |
-| **Backend files** | prisma/ + lib/auth.ts + lib/prisma.ts + lib/supabase-client.ts + 6 API routes | convex/ + 1 API route |
-| **Packages** | prisma + @prisma/client + @supabase/supabase-js + next-auth + bcryptjs | convex + @clerk/nextjs |
-| **Cache invalidation** | Manual | None needed |
-
-## What's Included
-
-| Feature | Stack |
-|---------|-------|
-| **Backend** | Convex (real-time database, server functions) |
-| **Auth** | Clerk (email/password + Google OAuth) |
-| **Payments** | Stripe (checkout, subscriptions, webhooks, portal) |
-| **Email** | Resend (via Convex actions) |
-| **Teams** | Multi-workspace with roles |
-| **Blog** | Markdown with SEO + static generation |
-| **SEO** | Metadata, sitemap, robots, Open Graph |
-| **Design** | Tailwind + Radix UI + dark mode |
-| **Claude Code** | CLAUDE.md agent team + 6 skill files |
+| Layer | Tool | Why |
+|-------|------|-----|
+| **Frontend** | Next.js 14, React 18, TypeScript | Industry standard |
+| **Backend** | Convex | Real-time DB, server functions, no migrations |
+| **Auth** | Clerk | Managed auth, OAuth, zero config |
+| **Payments** | Stripe | Checkout, subscriptions, webhooks, portal |
+| **AI Chatbot** | OpenAI + Pinecone | RAG-powered support bot on every page |
+| **Email** | Resend | Transactional email (welcome, invites) |
+| **Analytics** | PostHog | Product analytics, session replay, feature flags |
+| **Errors** | Sentry | Error tracking, performance monitoring |
+| **Cache** | Upstash Redis | Rate limiting, caching |
+| **Design** | Tailwind + Radix UI | HSL theming, dark mode, accessible |
+| **Content** | Markdown blog | SEO-optimized, static generation |
+| **Deploy** | Vercel + Convex Cloud | Zero config deployment |
+| **AI Dev** | Claude Code | Agent team with 7 skill files |
 
 ## Quick Start
 
-### 1. Clone and install
-
 ```bash
+# 1. Clone
 git clone https://github.com/YOUR_USERNAME/claude-code-webapp-boilerplate-v2.git my-app
 cd my-app
-npm install
-```
 
-### 2. Set up Convex
+# 2. Run setup (checks CLIs, installs deps, creates .env.local)
+bash scripts/setup.sh
 
-```bash
+# 3. Start Convex (creates backend automatically)
 npx convex dev
-# This creates your backend, generates types, and starts watching for changes
-```
 
-### 3. Set up Clerk
+# 4. Fill in your keys in .env.local + Convex env vars
 
-1. Create a Clerk app at [dashboard.clerk.com](https://dashboard.clerk.com)
-2. Copy your keys to `.env.local`:
-   ```
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-   CLERK_SECRET_KEY=sk_test_...
-   ```
-3. In Clerk Dashboard, set up a JWT template for Convex
-4. Set the issuer domain in Convex:
-   ```bash
-   npx convex env set CLERK_JWT_ISSUER_DOMAIN https://your-domain.clerk.accounts.dev
-   ```
-
-### 4. Set up Stripe
-
-```bash
-npx convex env set STRIPE_SECRET_KEY sk_test_...
-npx convex env set STRIPE_WEBHOOK_SECRET whsec_...
-```
-
-### 5. Run
-
-```bash
+# 5. Run
 npm run dev
-# Starts both Next.js and Convex dev server
+
+# 6. Build with Claude Code
+claude
 ```
 
-### 6. Build with Claude Code
+## What's Included
 
-```bash
-claude
+### Core Features
+- **Auth** — Clerk sign-in/sign-up with Google OAuth, protected routes
+- **Dashboard** — Real-time project list (open in 2 tabs to see live updates)
+- **Teams** — Multi-workspace with roles (owner/admin/editor/viewer)
+- **Payments** — Stripe checkout, subscription management, customer portal
+- **Blog** — Markdown-based with SEO, reading time, static generation
+
+### AI Chatbot
+Every site gets a floating AI support agent. The pipeline:
+1. **Ingest** — Add your docs/FAQ/pages as text
+2. **Embed** — OpenAI chunks and vectorizes content
+3. **Store** — Pinecone holds vectors, Convex holds chunks
+4. **Chat** — Users ask questions, get answers from YOUR content
+
+### Observability
+- **PostHog** — Auto-tracks pageviews, identifies Clerk users, session replay
+- **Sentry** — Catches errors on client + server, performance monitoring
+- **Upstash Redis** — Rate limiting for APIs, caching for expensive queries
+
+## Services You'll Need
+
+| Service | Free Tier | Dashboard |
+|---------|-----------|-----------|
+| Convex | 1M function calls/mo | `npx convex dev` (auto-creates) |
+| Clerk | 10K MAU | [dashboard.clerk.com](https://dashboard.clerk.com) |
+| Stripe | Test mode free | [dashboard.stripe.com](https://dashboard.stripe.com) |
+| OpenAI | Pay per token | [platform.openai.com](https://platform.openai.com) |
+| Pinecone | 1 index free | [app.pinecone.io](https://app.pinecone.io) |
+| Upstash | 10K cmds/day | [console.upstash.com](https://console.upstash.com) |
+| PostHog | 1M events/mo | [posthog.com](https://posthog.com) |
+| Sentry | 5K errors/mo | [sentry.io](https://sentry.io) |
+| Resend | 100 emails/day | [resend.com](https://resend.com) |
+
+## Environment Variables
+
+**In `.env.local`** (Next.js client):
+```
+CONVEX_DEPLOYMENT, NEXT_PUBLIC_CONVEX_URL
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY, CLERK_SECRET_KEY
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+NEXT_PUBLIC_POSTHOG_KEY, NEXT_PUBLIC_POSTHOG_HOST
+NEXT_PUBLIC_SENTRY_DSN
+UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN
+```
+
+**In Convex** (server functions — set via `npx convex env set`):
+```
+CLERK_JWT_ISSUER_DOMAIN
+STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
+OPENAI_API_KEY
+PINECONE_API_KEY, PINECONE_INDEX
+RESEND_API_KEY, RESEND_FROM_EMAIL
 ```
 
 ## Project Structure
 
 ```
-convex/                 # Backend (schema, queries, mutations, actions)
+convex/                 # Backend (replaces API routes + DB layer)
+  schema.ts             # All tables (users, teams, projects, payments, AI)
+  ai.ts                 # RAG pipeline (ingest, embed, chat)
+  users.ts, projects.ts, teams.ts, stripe.ts, email.ts
 app/                    # Next.js pages
-  api/stripe/webhook/   # Only API route (everything else is Convex)
-  auth/                 # Clerk sign-in/sign-up
-  blog/                 # Markdown blog
-  dashboard/            # Real-time dashboard
-components/ui/          # Button, Card, Input
-lib/                    # utils, blog parser
-content/blog/           # Markdown posts
-.claude/                # Agent team + skills
+  api/stripe/webhook/   # Only API route needed
+components/
+  chat/chat-widget.tsx  # Floating AI chatbot
+  ui/                   # Button, Card, Input
+  providers/            # Convex + Clerk + PostHog + Theme
+lib/                    # Utils, blog parser, Upstash, Sentry
+scripts/setup.sh        # CLI checker + setup wizard
+.claude/                # Agent team (7 roles) + 7 skill files
 ```
 
-## The Real-Time Demo
+## Stripe Testing
 
-Open `/dashboard` in two browser tabs. Create a project in one — it appears in the other instantly. No refresh, no polling, no WebSocket setup. This is what Convex gives you for free.
+```bash
+npm run dev                    # Terminal 1
+npm run stripe:listen          # Terminal 2
+# Use test card: 4242 4242 4242 4242
+```
+
+## Deploy
+
+```bash
+# Frontend
+vercel
+
+# Backend (automatic with Convex)
+npx convex deploy
+```
 
 ## License
 
-MIT
+MIT — use for any project, personal or commercial.

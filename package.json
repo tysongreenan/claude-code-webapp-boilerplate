@@ -43,6 +43,13 @@
     "remark": "^15.0.1",
     "remark-html": "^16.0.1",
     "resend": "^6.9.4",
+    "@pinecone-database/pinecone": "^4.0.0",
+    "@sentry/nextjs": "^8.0.0",
+    "@upstash/ratelimit": "^2.0.0",
+    "@upstash/redis": "^1.34.0",
+    "ai": "^4.0.0",
+    "openai": "^4.70.0",
+    "posthog-js": "^1.130.0",
     "stripe": "^19.1.0",
     "tailwind-merge": "^2.2.0",
     "tailwindcss-animate": "^1.0.7"
