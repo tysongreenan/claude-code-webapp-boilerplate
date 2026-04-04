@@ -1,4 +1,4 @@
-import { query, mutation, internalMutation } from "./_generated/server"
+import { query, internalQuery, internalMutation } from "./_generated/server"
 import { v } from "convex/values"
 
 // Get the current authenticated user
@@ -11,6 +11,17 @@ export const current = query({
     return await ctx.db
       .query("users")
       .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
+      .unique()
+  },
+})
+
+// Get user by token identifier (internal — used by stripe.ts)
+export const getByToken = internalQuery({
+  args: { tokenIdentifier: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", args.tokenIdentifier))
       .unique()
   },
 })

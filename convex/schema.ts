@@ -95,20 +95,4 @@ export default defineSchema({
     .index("by_document", ["documentId"])
     .index("by_pinecone", ["pineconeId"]),
 
-  // Chat conversations
-  chatConversations: defineTable({
-    userId: v.optional(v.id("users")), // null for anonymous visitors
-    sessionId: v.string(), // browser session for anonymous users
-    teamId: v.optional(v.id("teams")),
-  })
-    .index("by_session", ["sessionId"])
-    .index("by_user", ["userId"]),
-
-  // Chat messages
-  chatMessages: defineTable({
-    conversationId: v.id("chatConversations"),
-    role: v.string(), // 'user', 'assistant'
-    content: v.string(),
-  })
-    .index("by_conversation", ["conversationId"]),
 })
