@@ -90,7 +90,9 @@ app/                    # Next.js pages
   api/stripe/webhook/   # Stripe webhook (only API route)
   auth/                 # Clerk sign-in/register
   blog/                 # Markdown blog
+  support/              # Support center (help articles)
   dashboard/            # Real-time dashboard
+  admin/                # Admin dashboard + knowledge base
 components/
   ui/                   # Button, Card, Input
   chat/                 # AI chatbot widget
@@ -98,12 +100,14 @@ components/
 lib/
   utils.ts              # cn(), formatDate
   blog.ts               # Markdown blog parser
+  support.ts            # Support article parser (by category)
   upstash.ts            # Redis client, rate limiter, cache helpers
   sentry.ts             # Error capture helper
 sentry.client.config.ts # Sentry browser config
 sentry.server.config.ts # Sentry server config
 scripts/setup.sh        # CLI checker + setup wizard
 content/blog/           # Markdown posts
+content/support/        # Support articles (getting-started, billing, features, troubleshooting)
 middleware.ts           # Clerk auth middleware
 ```
 
@@ -199,6 +203,7 @@ These are pre-built skills the user can invoke:
 | `/deploy` or `/deploy prod` | Pre-flight checks → deploy → post-deploy verification |
 | `/health` | Check all 10 services are connected and responding |
 | `/ingest-blog` | Feed all blog posts into the AI chatbot knowledge base |
+| `/ingest-support` | Feed all support articles into the AI chatbot knowledge base |
 
 ### Automation with Loop and Schedule
 
