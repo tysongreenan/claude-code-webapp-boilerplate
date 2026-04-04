@@ -105,16 +105,29 @@ echo "  8. Sentry     → https://sentry.io (free tier error tracking)"
 echo "  9. Resend     → https://resend.com (free tier email)"
 echo ""
 
-echo "Convex environment variables (set via CLI):"
+# ── Generate admin setup key ─────────────────────────────
+
+ADMIN_KEY=$(openssl rand -hex 24 2>/dev/null || head -c 48 /dev/urandom | xxd -p | head -c 48)
+echo "Admin setup key generated (save this — you'll need it once to claim admin):"
 echo ""
+echo -e "  ${GREEN}$ADMIN_KEY${NC}"
+echo ""
+echo "Set it in Convex now:"
+echo -e "  ${YELLOW}npx convex env set ADMIN_SETUP_KEY $ADMIN_KEY${NC}"
+echo ""
+
+echo "Other Convex environment variables:"
+echo ""
+echo "  npx convex env set CLERK_JWT_ISSUER_DOMAIN https://..."
 echo "  npx convex env set STRIPE_SECRET_KEY sk_test_..."
 echo "  npx convex env set STRIPE_WEBHOOK_SECRET whsec_..."
 echo "  npx convex env set OPENAI_API_KEY sk-..."
 echo "  npx convex env set PINECONE_API_KEY ..."
 echo "  npx convex env set PINECONE_INDEX knowledge"
 echo "  npx convex env set RESEND_API_KEY re_..."
-echo "  npx convex env set CLERK_JWT_ISSUER_DOMAIN https://..."
 echo ""
 
 echo -e "${GREEN}Setup complete!${NC} Run: npm run dev"
+echo ""
+echo "After starting, visit /admin/setup and enter the admin key above to claim admin."
 echo ""

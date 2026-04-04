@@ -130,5 +130,53 @@ Stripe checkout via Convex actions. Webhook at `/api/stripe/webhook` calls Conve
 | Vercel | `npm i -g vercel` | Deploy frontend |
 | Stripe | `brew install stripe/stripe-cli/stripe` | Test webhooks |
 
-## Setup
-Run `bash scripts/setup.sh` for guided setup.
+## Setup (Claude Code handles this)
+
+When the user says "set up the project" or "get started", follow these steps:
+
+### 1. Install dependencies
+```bash
+npm install
+```
+
+### 2. Initialize Convex
+```bash
+npx convex dev
+```
+This creates the Convex project and generates `convex/_generated/`.
+
+### 3. Set Convex environment variables
+The user will provide API keys. Set them with:
+```bash
+npx convex env set CLERK_JWT_ISSUER_DOMAIN <value>
+npx convex env set STRIPE_SECRET_KEY <value>
+npx convex env set STRIPE_WEBHOOK_SECRET <value>
+npx convex env set OPENAI_API_KEY <value>
+npx convex env set PINECONE_API_KEY <value>
+npx convex env set PINECONE_INDEX knowledge
+npx convex env set RESEND_API_KEY <value>
+```
+
+### 4. Generate and set the admin setup key
+This is critical — it secures the /admin panel:
+```bash
+# Generate a random key
+openssl rand -hex 24
+# Set it in Convex
+npx convex env set ADMIN_SETUP_KEY <the-generated-key>
+```
+Tell the user to save this key — they'll enter it once at /admin/setup to claim admin access.
+
+### 5. Create .env.local
+Copy `.env.example` to `.env.local` and fill in the client-side keys (NEXT_PUBLIC_*).
+
+### 6. Start dev server
+```bash
+npm run dev
+```
+
+### Admin Security
+- The ADMIN_SETUP_KEY prevents random users from claiming admin after deployment
+- Only someone with the key can become admin at /admin/setup
+- After claiming, the key is no longer needed (one-time use)
+- Additional admins can be granted by existing admins from the admin panel
