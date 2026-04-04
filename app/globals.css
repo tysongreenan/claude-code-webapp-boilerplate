@@ -80,6 +80,15 @@ input:-webkit-autofill:focus {
 ::-webkit-scrollbar-track { @apply bg-muted; }
 ::-webkit-scrollbar-thumb { @apply bg-muted-foreground/20 rounded-full; }
 
+/* RTL support */
+[dir="rtl"] {
+  text-align: right;
+}
+[dir="rtl"] .prose ul, [dir="rtl"] .prose ol {
+  padding-left: 0;
+  padding-right: 1.5rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
