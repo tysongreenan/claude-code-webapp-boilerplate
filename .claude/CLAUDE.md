@@ -1,5 +1,18 @@
 # Webapp Boilerplate v2 — Convex + Clerk + AI
 
+## UI & DESIGN — READ THIS BEFORE WRITING ANY UI CODE
+
+**When the user asks to build, design, create, or improve any UI** (pages, components, forms, layouts, dashboards, landing pages, etc.) — follow this order every time:
+
+1. **Read the design rules first**: Read `.agents/skills/frontend-design/SKILL.md` before writing a single line of UI code. Apply every rule in it. No exceptions.
+2. **Write the copy**: For any customer-facing page (landing, marketing, about, pricing, features, blog), read `.agents/skills/nextjs-seo/SKILL.md` and write the copy and structure before coding. Apply the page templates, hard rules, and SEO rules.
+3. **Check the component registry**: Read `components/blocks/REGISTRY.md` — 90+ pre-built blocks organized by category. Always pick an existing block over building from scratch.
+4. **Then code**: Implement using the design rules, copy, and blocks you just read.
+
+**Key rule:** Always design with VISUALS FIRST. Feature cards need large illustration areas (60%+), not just text with a tiny icon.
+
+---
+
 ## FIRST TIME SETUP
 **When the user says "set up the project", "get started", "initialize", or "configure everything":**
 Read and follow the plan at `.claude/plans/setup.md` — it has the complete step-by-step
@@ -38,15 +51,15 @@ The plan is designed to one-shot the entire setup with minimal back-and-forth.
 ### Frontend Designer (Opus)
 **Role:** UX/UI specialist.
 **Skills files:**
-- `.claude/.agents/skills/frontend-design/SKILL.md`
-- `.claude/.agents/skills/brand-guidelines/SKILL.md`
+- `.agents/skills/frontend-design/SKILL.md`
+- `.agents/skills/brand-guidelines/SKILL.md`
 
 ### Backend Developer (Opus)
 **Role:** Backend specialist for Convex, AI, Stripe, deployment.
 **Skills files:**
-- `.claude/.agents/skills/convex-backend/SKILL.md`
-- `.claude/.agents/skills/stripe-integration/SKILL.md`
-- `.claude/.agents/skills/ai-chatbot/SKILL.md`
+- `.agents/skills/convex-backend/SKILL.md`
+- `.agents/skills/stripe-integration/SKILL.md`
+- `.agents/skills/ai-chatbot/SKILL.md`
 
 ### Code Reviewer (Sonnet)
 **Role:** Reviews code. Catches bugs, security issues, performance problems.
@@ -59,7 +72,7 @@ The plan is designed to one-shot the entire setup with minimal back-and-forth.
 
 ### Copywriter (Haiku)
 **Role:** User-facing text and SEO.
-**Skill file:** `.claude/.agents/skills/nextjs-seo/SKILL.md`
+**Skill file:** `.agents/skills/nextjs-seo/SKILL.md`
 
 ---
 
