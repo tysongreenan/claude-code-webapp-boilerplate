@@ -1,4 +1,4 @@
-# Webapp Boilerplate v2 — Convex + Clerk + AI
+# Webapp Boilerplate v2 — Convex + NextAuth + AI
 
 ## UI & DESIGN — READ THIS BEFORE WRITING ANY UI CODE
 
@@ -22,7 +22,7 @@ The plan is designed to one-shot the entire setup with minimal back-and-forth.
 ## Tech Stack
 - **Framework:** Next.js 14, React 18, TypeScript
 - **Backend:** Convex (real-time database, server functions, file storage)
-- **Auth:** Clerk (managed authentication, Google OAuth, email/password)
+- **Auth:** NextAuth.js (Credentials + Google OAuth, JWT strategy)
 - **Styling:** Tailwind CSS, Radix UI, Framer Motion
 - **Payments:** Stripe (checkout, subscriptions, webhooks)
 - **Email:** Resend (transactional email via Convex actions)
@@ -42,7 +42,7 @@ The plan is designed to one-shot the entire setup with minimal back-and-forth.
 **Skills:**
 - Next.js 14 App Router, React Server Components
 - Convex — schema, queries, mutations, actions
-- Clerk — authentication, middleware
+- NextAuth.js — authentication, session management, middleware
 - OpenAI + Pinecone — embeddings, RAG, AI chatbot
 - Stripe — checkout, subscriptions, webhooks
 - Tailwind CSS, Radix UI, Framer Motion
@@ -91,8 +91,7 @@ The plan is designed to one-shot the entire setup with minimal back-and-forth.
 ```
 convex/                 # Backend
   schema.ts             # Database schema (users, teams, projects, payments, AI knowledge base)
-  auth.config.ts        # Clerk provider config
-  users.ts              # User CRUD (synced from Clerk)
+  users.ts              # User CRUD
   projects.ts           # Projects (real-time)
   teams.ts              # Teams + invitations
   stripe.ts             # Stripe actions + mutations
@@ -101,7 +100,7 @@ convex/                 # Backend
   model/auth.ts         # getCurrentUser() helper
 app/                    # Next.js pages
   api/stripe/webhook/   # Stripe webhook (only API route)
-  auth/                 # Clerk sign-in/register
+  auth/                 # NextAuth sign-in/register
   blog/                 # Markdown blog
   support/              # Support center (help articles)
   dashboard/            # Real-time dashboard
@@ -109,7 +108,7 @@ app/                    # Next.js pages
 components/
   ui/                   # Button, Card, Input
   chat/                 # AI chatbot widget
-  providers/            # Convex + Clerk + PostHog + Theme
+  providers/            # Convex + PostHog + Theme
 lib/
   utils.ts              # cn(), formatDate
   blog.ts               # Markdown blog parser
@@ -121,10 +120,14 @@ sentry.server.config.ts # Sentry server config
 scripts/setup.sh        # CLI checker + setup wizard
 content/blog/           # Markdown posts
 content/support/        # Support articles (getting-started, billing, features, troubleshooting)
-middleware.ts           # Clerk auth middleware
+middleware.ts           # NextAuth session cookie middleware
 ```
 
 ## Key Patterns
+
+### Authentication
+NextAuth.js with JWT strategy. Middleware checks session cookies for protected routes.
+User lookup in Convex via `getCurrentUserByEmail()` in `convex/model/auth.ts`.
 
 ### Real-Time Data
 Every `useQuery` is a live subscription. No polling, no cache invalidation. Open two tabs to see it.
@@ -138,7 +141,7 @@ Every `useQuery` is a live subscription. No polling, no cache invalidation. Open
 Stripe checkout via Convex actions. Webhook at `/api/stripe/webhook` calls Convex mutations.
 
 ### Observability
-- **PostHog** — auto-tracks pageviews, identifies users via Clerk
+- **PostHog** — auto-tracks pageviews, identifies users via NextAuth session
 - **Sentry** — catches errors client + server, session replay on errors
 
 ### Rate Limiting
@@ -171,7 +174,6 @@ This creates the Convex project and generates `convex/_generated/`.
 ### 3. Set Convex environment variables
 The user will provide API keys. Set them with:
 ```bash
-npx convex env set CLERK_JWT_ISSUER_DOMAIN <value>
 npx convex env set STRIPE_SECRET_KEY <value>
 npx convex env set STRIPE_WEBHOOK_SECRET <value>
 npx convex env set OPENAI_API_KEY <value>

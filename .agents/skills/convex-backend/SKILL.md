@@ -20,8 +20,9 @@ description: Convex backend patterns. Use when writing queries, mutations, actio
 - `v.id("tableName")` for foreign keys
 
 ## Auth
-- Clerk provides identity via `ctx.auth.getUserIdentity()`
-- `getCurrentUser()` from `convex/model/auth.ts` resolves identity → user record
+- NextAuth provides session via JWT cookies — middleware checks `next-auth.session-token`
+- `getCurrentUserByEmail(ctx, email)` from `convex/model/auth.ts` resolves email → user record
+- `getCurrentUser(ctx)` uses Convex auth identity (legacy Clerk path, still works)
 - `internalMutation` / `internalQuery` for server-only functions
 
 ## Environment Variables
